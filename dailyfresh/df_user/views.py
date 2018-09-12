@@ -3,10 +3,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponseRedirect
 from hashlib import sha1
 from models import *
+from df_goods.models import *
+import user_decorator
 
 
 def register(request):
     context = {
+        'page_name': 1,
         'title': '用户注册',
     }
     return render(request, 'df_user/register.html', context)
@@ -48,6 +51,7 @@ def register_handle(request):
 def login(request):
     uname = request.COOKIES.get('uname', '')
     context = {
+        'page_name': 1,
         'title': '用户登录',
         'error_name': 0,
         'error_pwd': 0,
@@ -75,8 +79,9 @@ def login_handle(request):
 
         # 判断用户输入的密码和数据库中的密码是否相同
         if upwd1 == upwd2:
-            red = HttpResponseRedirect('/user/info')
-            if jizhu ==1:
+            url=request.COOKIES.get('url', '/')
+            red = HttpResponseRedirect(url)
+            if jizhu == 1:
                 red.set_cookie('uname', uname)
             else:
                 red.set_cookie('uname', '', max_age=-1)
@@ -87,6 +92,7 @@ def login_handle(request):
         # 即用户密码输入错误
         else:
             context = {
+                'page_name': 1,
                 'title': '用户登录',
                 'error_name': 0,
                 'error_pwd': 1,
@@ -98,6 +104,7 @@ def login_handle(request):
     # 没有查询到用户名
     else:
         context = {
+            'page_name': 1,
             'title': '用户登录',
             'error_name': 1,
             'error_pwd': 0,
@@ -107,23 +114,36 @@ def login_handle(request):
         return render(request, 'df_user/login.html', context)
 
 
+@user_decorator.login
 def info(request):
     user_email = UserInfo.objects.get(id=request.session['user_id']).uemial
+    # 最近浏览
+    goods_ids = request.COOKIES.get('goods_ids', '')
+    goods_ids1 = goods_ids.split(',')
+    goods_list = []
+    for goods_id in goods_ids1:
+        goods_list.append(GoodsInfo.objects.get(id=int(goods_id)))
+
     context = {
+        'page_name': 1,
         'title': '用户中心',
         'user_email': user_email,
-        'user_name': request.session['user_name']
+        'user_name': request.session['user_name'],
+        'goods_list': goods_list
     }
     return render(request, 'df_user/user_center_info.html', context)
 
 
+@user_decorator.login
 def order(request):
     context = {
+        'page_name': 1,
         'title': '用户中心'
     }
     return render(request, 'df_user/user_center_order.html', context)
 
 
+@user_decorator.login
 def site(request):
     user = UserInfo.objects.get(id=request.session['user_id'])
     if request.method == 'POST':
@@ -134,11 +154,17 @@ def site(request):
         user.uphone = post.get('uphone')
         user.save()
     context = {
+        'page_name': 1,
         'title': '用户中心',
         'user': user,
     }
     return render(request, 'df_user/user_center_site.html', context)
 
+
+
+def logout(request):
+    request.session.flush()
+    return redirect('/')
 
 
 

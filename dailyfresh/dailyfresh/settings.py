@@ -1,3 +1,4 @@
+#coding=utf-8
 """
 Django settings for dailyfresh project.
 
@@ -38,6 +39,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'df_user',
+    'df_goods',
+    'tinymce',
+    'df_cart',
+    'df_order',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -90,9 +95,9 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -109,7 +114,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
+# 开发阶段上传文件目录
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
+# 部署后上传文件目录
+# MEDIA_ROOT = '/var/www/dailyfresh/static'
 
 
 SESSION_ENGINE = 'redis_sessions.session'
@@ -118,3 +126,10 @@ SESSION_REDIS_PORT = 6379
 SESSION_REDIS_DB = 0
 SESSION_REDIS_PASSWORD = ''
 SESSION_REDIS_PREFIX = 'session'
+
+
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'advanced',
+    'width': 600,
+    'height': 400,
+}
